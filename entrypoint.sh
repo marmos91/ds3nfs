@@ -1,5 +1,6 @@
 #!/bin/bash
 
+<<<<<<< Updated upstream
 # Make sure we react to these signals by running stop() when we see them - for clean shutdown
 # And then exiting
 trap "stop; exit 0;" SIGTERM SIGINT
@@ -8,10 +9,22 @@ stop() {
     # We're here because we've seen SIGTERM, likely via a Docker stop command or similar
     # Let's shutdown cleanly
     echo "SIGTERM caught, terminating NFS process(es)..."
+=======
+trap "stop; exit 0;" SIGTERM SIGINT
+
+S3FS_PASSWD_FILE=/tmp/passwd-s3fs
+ENABLE_CACHE=${ENABLE_CACHE:-0}
+
+stop() {
+>>>>>>> Stashed changes
     /usr/sbin/exportfs -uav
     /usr/sbin/rpc.nfsd 0
     pid1=$(pidof rpc.nfsd)
     pid2=$(pidof rpc.mountd)
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     # For IPv6 bug:
     pid3=$(pidof rpcbind)
     kill -TERM $pid1 $pid2 $pid3 >/dev/null 2>&1
@@ -19,9 +32,28 @@ stop() {
     exit
 }
 
+<<<<<<< Updated upstream
 rm /etc/exports
 
 # Check if the SHARED_DIRECTORY variable is empty
+=======
+function set_s3_access {
+    echo "$1:$2" >$S3FS_PASSWD_FILE
+    chmod 600 $S3FS_PASSWD_FILE
+}
+
+function mount_s3_bucket {
+    echo "Mounting s3 bucket '$2' from '$1' to $SHARED_DIRECTORY"
+    OPTIONS="passwd_file=$S3FS_PASSWD_FILE,umask=022,allow_other,url=$1"
+    if [ $ENABLE_CACHE -ne 0 ]; then
+        OPTIONS="$OPTIONS,use_cache=/tmp"
+    fi
+    s3fs -d -o "$OPTIONS" $2 $SHARED_DIRECTORY
+}
+
+rm /etc/exports
+
+>>>>>>> Stashed changes
 if [ -z "${SHARED_DIRECTORY}" ]; then
     echo "The SHARED_DIRECTORY environment variable is unset or null, exiting..."
     exit 1
@@ -31,7 +63,10 @@ else
     /bin/sed -i "s@{{SHARED_DIRECTORY}}@${SHARED_DIRECTORY}@g" /etc/exports
 fi
 
+<<<<<<< Updated upstream
 # Check if the PERMITTED variable is empty
+=======
+>>>>>>> Stashed changes
 if [ -z "${PERMITTED}" ]; then
     echo "The PERMITTED environment variable is unset or null, defaulting to '*'."
     echo "This means any client can mount."
@@ -70,11 +105,30 @@ fi
 set -uo pipefail
 IFS=$'\n\t'
 
+<<<<<<< Updated upstream
 # This loop runs till until we've started up successfully
 while true; do
 
     echo "In the loooop"
 
+=======
+# Mounting S3 Bucket
+S3_ENDPOINT=https://s3.cubbit.eu
+# if [ ! -z "$TENANT" ]; then
+#     S3_ENDPOINT=https://s3.$TENANT.cubbit.eu
+# fi
+
+if [ ! -z "$S3_ACCESS_KEY_ID" -a ! -z "$S3_SECRET_ACCESS_KEY" ]; then
+    echo "Set s3 access"
+    set_s3_access $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY
+fi
+
+mount_s3_bucket $S3_ENDPOINT $S3_BUCKET
+
+# This loop runs till until we've started up successfully
+while true; do
+
+>>>>>>> Stashed changes
     # Check if NFS is running by recording it's PID (if it's not running $pid will be null):
     pid=$(pidof rpc.mountd)
 
