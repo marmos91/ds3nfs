@@ -1,3 +1,3 @@
-# S3NFS
+# DS3NFS
 
-Bridge NFS to an S3 Bucket.
+Bridge NFS to a Cubbit DS3 Bucket.
